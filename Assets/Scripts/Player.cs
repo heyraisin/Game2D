@@ -1,5 +1,7 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -8,12 +10,16 @@ public class Player : MonoBehaviour
     private float jumpingPower = 16f;
     private bool isFacingRight = true;
     private bool doubleJump;
-    private float destroyDelay = 0.65f;
 
+    [SerializeField] private GameObject finishGO;
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private Animator animator;
+    [SerializeField] private AudioSource deathSoundEffect;
+    [SerializeField] private AudioSource jumpSoundEffect;
+    [SerializeField] private AudioSource finishSoundEffect;
+    [SerializeField] private GameObject fishishAlert;
 
     // runs once per frame
     void Update()
@@ -34,6 +40,7 @@ public class Player : MonoBehaviour
         {
             if (IsGrounded() || doubleJump)
             {
+                jumpSoundEffect.Play();
                 rb.velocity = new Vector2(rb.velocity.x, jumpingPower);
 
                 doubleJump = !doubleJump;
@@ -44,9 +51,17 @@ public class Player : MonoBehaviour
 
         if (Input.GetButtonUp("Jump") && rb.velocity.y > 0f)
         {
+            jumpSoundEffect.Play();
             animator.SetBool("IsJumping", true);
             rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
         }
+
+        if (gameObject.GetComponent<ItemCollector>().getNumberOfFood() == 20)
+        {
+            StartCoroutine(WaitAlert());
+            fishishAlert.SetActive(true);
+            finishGO.SetActive(true);
+        } 
 
         Crouch();
 
@@ -55,11 +70,30 @@ public class Player : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Enemy") && IsGrounded())
+        if ((collision.gameObject.CompareTag("Enemy") && IsGrounded()) || collision.gameObject.CompareTag("Trap"))
         {
+            deathSoundEffect.Play();
+            StartCoroutine(EndGame());
             animator.SetBool("IsHurt", true);
-            Destroy(gameObject, destroyDelay);
         }
+
+        if (collision.gameObject.CompareTag("Gate"))
+        {
+            finishSoundEffect.Play();
+            StartCoroutine(EndGame());
+        }
+    }
+
+    IEnumerator EndGame()
+    {
+        yield return new WaitForSeconds(0.6f);
+        SceneManager.LoadScene("EndScreen");
+    }
+
+    IEnumerator WaitAlert()
+    {
+        yield return new WaitForSeconds(2f);
+        Destroy(fishishAlert);
     }
 
     public bool IsGrounded()

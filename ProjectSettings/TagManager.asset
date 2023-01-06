@@ -7,6 +7,8 @@ TagManager:
   - Teleporter
   - Enemy
   - Food
+  - Trap
+  - Gate
   layers:
   - Default
   - TransparentFX
@@ -55,4 +57,7 @@ TagManager:
     locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Player
+    uniqueID: 1677013645
     locked: 0
