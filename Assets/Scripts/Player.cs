@@ -80,7 +80,7 @@ public class Player : MonoBehaviour
         if (collision.gameObject.CompareTag("Gate"))
         {
             finishSoundEffect.Play();
-            StartCoroutine(EndGame());
+            StartCoroutine(WinGame());
         }
     }
 
@@ -88,6 +88,12 @@ public class Player : MonoBehaviour
     {
         yield return new WaitForSeconds(0.6f);
         SceneManager.LoadScene("EndScreen");
+    }
+
+    IEnumerator WinGame()
+    {
+        yield return new WaitForSeconds(0.6f);
+        SceneManager.LoadScene(3);
     }
 
     IEnumerator WaitAlert()
